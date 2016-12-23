@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Transistor Auth</title>
+    <style>
+      #access_token {
+        display:none;
+      }
+      #form {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        margin-left: -212px;
+        margin-top: -180px;
+        height: 300px;
+        width: 364px;
+        padding: 30px;
+        background-color: #303030;
+        border: 10px solid #303030;
+        border-radius: 5px;
+        font-size: 25px;
+        color: white;
+        box-shadow: 2px 2px 8px #202020
+      }
+      input[type=text] {
+        width: 356px;
+        padding: 4px;
+        border: 0;
+        background-color: rgba(0,0,0,0);
+        border-bottom: 1px solid gray;
+        font-size: 28px;
+        color: #555;
+      }
+
+      * {
+        font-family: Impact, Charcoal, sans-serif
+      }
+
+      body {
+        background-color: #606060;
+      }
+      button {
+        border: none;
+        padding: 10px;
+        float: right;
+        height: 42px;
+      }
+      button:hover {
+        background-color: #999;
+      }
+      #info {
+        text-align: center;
+        font-size: 32px;
+        margin-bottom: 20px;
+        color: #555
+      }
+      span.name {
+        padding: 4px;
+        margin-right: 5px;
+        float: right;
+        color: gray;
+      }
+      #submit {
+        margin-top: 25px;
+        width: 264px;
+        margin-left: 50px;
+        float: none;
+      }
+    </style>
+    <script type='text/javascript'>
+      var data = {};
+      var intervals = {};
+
+      window.onload = function(){
+        document.querySelector('#bot').onclick = auth;
+        document.querySelector('#streamer').onclick = auth;
+        document.querySelector('#submit').onclick = send;
+      };
+
+      function getUsername(acct, token){
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://api.twitch.tv/kraken/user', true);
+
+        xhr.setRequestHeader('Accept', 'application/vnd.twitchtv.v3+json');
+        xhr.setRequestHeader('Authorization', 'OAuth ' + token);
+
+        xhr.onreadystatechange = function(){
+          if(xhr.readyState == 4){
+            var name = JSON.parse(xhr.responseText)['name']
+            data[acct+'-username'] = name;
+            document.querySelector('.name.'+acct).textContent = name;
+          }
+        }
+
+        xhr.send()
+      }
+
+      //First returned message will be "streamer|stop" or "bot|stop", stopping the sending of the messages.
+      //Second will be "[id]|[oauth token]", and that's added to the data object
+      function onMessage(e){
+        var split = e.data.split('|');
+        clearInterval(intervals[split[0]]);
+        data[split[0]+'-token'] = split[1];
+        getUsername(split[0], split[1])
+      }
+
+      if(window.attachEvent){
+        window.attachEvent('onmessage', onMessage);
+      }else{
+        window.addEventListener('message', onMessage);
+      }
+
+      function auth(e){
+        e = e || window.event;
+        var caller = e.target || e.srcElement;
+        var which = caller.id;
+
+        var scopes;
+
+        if(which === 'bot'){
+          scopes = [
+            'chat_login',
+            'user_read'
+          ];
+        }else{
+          scopes = [
+            'chat_login',
+            'user_read',
+            'channel_editor',
+            'channel_commercial',
+            'channel_subscriptions',
+            'channel_feed_edit'
+          ];
+        }
+
+        //Open window
+        var domain = 'http://localhost:8082';
+        var authenticator = window.open("https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=0kvzk36qysxe0sltumcip8wfil4vfs&redirect_uri=http%3A%2F%2Flocalhost%3A8082%2Fauth&scope=" + scopes.join('+') + "&force_verify=true");
+
+        //Start sending it messages identifying it based on $which
+        //On response, stop.
+        intervals[which] = setInterval(function(){
+          authenticator.postMessage(which, domain);
+        }, 2000);
+      }
+
+      function send(){
+        var dataArray = [];
+        for(var key in data){
+          dataArray.push(key + '=' + data[key]);
+        }
+        var dataString = dataArray.join('&')
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://localhost:8082', true);
+
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("Content-length", dataString.length);
+        xhr.setRequestHeader("Connection", "close");
+
+        xhr.send(dataString);
+      }
+    </script>
+  </head>
+  <body>
+    <div id='form'>
+      <div id='info'>Transistor Bot OAuth Hub</div>
+      <div>
+        <div>Bot Account</div>
+        <div>
+          <button id='bot'>Connect</button><span class='name bot'>(none selected)</span>
+        </div>
+      </div>
+      <div style='margin-top:70px;'>
+        <div>Streamer Account</div>
+        <div>
+          <button id='streamer'>Connect</button><span class='name streamer'>(none selected)</span>
+        </div>
+      </div>
+      <button id='submit'>Submit</button>
+    </div>
+  </body>
+</html>

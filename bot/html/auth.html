@@ -1,88 +1,28 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Transistor Auth</title>
-    <style>
-      #access_token {
-        display:none;
-      }
-      #form {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        margin-left: -212px;
-        margin-top: -180px;
-        height: 300px;
-        width: 364px;
-        padding: 30px;
-        background-color: #303030;
-        border: 10px solid #303030;
-        border-radius: 5px;
-        font-size: 25px;
-        color: white;
-        box-shadow: 2px 2px 8px #202020
-      }
-      input[type=text] {
-        width: 356px;
-        padding: 4px;
-        border: 0;
-        background-color: rgba(0,0,0,0);
-        border-bottom: 1px solid gray;
-        font-size: 28px;
-        color: #555;
-      }
-
-      * {
-        font-family: Impact, Charcoal, sans-serif
-      }
-
-      body {
-        background-color: #606060;
-      }
-      button {
-        border: none;
-        padding: 10px;
-        margin-top: 8px;
-        float: right;
-      }
-      button:hover {
-        background-color: #999;
-      }
-      #info {
-        text-align: center;
-        font-size: 32px;
-        margin-bottom: 20px;
-        color: #555
-      }
-    </style>
-    <script type='text/javascript'>
-      window.onload = function(){
-        var token = document.location.hash.split('&')[0].split('=')[1]
-        document.getElementById('access_token').value = token
-      }
-    </script>
+    <title>Authenticating</title>
   </head>
   <body>
-    <div id='form'>
-      <div id='info'>Finish Auth</div>
-      <form method="post">
-        <input type='text' id='access_token' name='access_token' />
-        <div>
-          <label for='server'>Server</label>
-        </div>
-        <div>
-          <input type='text' id='server' name='server' />
-        </div>
-        <div>
-          <label for='username'>Username</label>
-        </div>
-        <div>
-          <input type='text' id='username' name='username' />
-        </div>
-        <div>
-          <button type='submit'>Submit</button>
-        </div>
-      </form>
-    </div>
+    <script type='text/javascript'>
+      var spawner;
+      var id;
+      var domain = 'http://localhost:8082';
+      function onMessage(e){
+        spawner = e.source;
+        id = e.data;
+
+        var token = document.location.hash.split('&')[0].split('=')[1];
+
+        spawner.postMessage(id + '|' + token, domain);
+        window.close();
+      }
+
+      if(window.attachEvent){
+        window.attachEvent('onmessage', onMessage);
+      }else{
+        window.addEventListener('message', onMessage);
+      }
+    </script>
   </body>
 </html>
