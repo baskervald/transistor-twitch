@@ -1,5 +1,4 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from pprint import pprint
 
 def authenticate(auth_obj):
     class RequestHandler(BaseHTTPRequestHandler):
@@ -31,6 +30,11 @@ def authenticate(auth_obj):
 
             return
 
+        def log_message(self, format, *args):
+            return
+
     httpd = HTTPServer(('127.0.0.1', 8082), RequestHandler)
+    print("Navigate to the below url in your web browser to authenticate:")
+    print("http://localhost:8082/main")
     while not auth_obj:
         httpd.handle_request()
