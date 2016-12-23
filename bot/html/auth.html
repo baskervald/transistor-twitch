@@ -11,8 +11,8 @@
         top: 50%;
         left: 50%;
         margin-left: -212px;
-        margin-top: -130px;
-        height: 200px;
+        margin-top: -180px;
+        height: 300px;
         width: 364px;
         padding: 30px;
         background-color: #303030;
@@ -45,7 +45,9 @@
         margin-top: 8px;
         float: right;
       }
-
+      button:hover {
+        background-color: #999;
+      }
       #info {
         text-align: center;
         font-size: 32px;
@@ -65,6 +67,12 @@
       <div id='info'>Finish Auth</div>
       <form method="post">
         <input type='text' id='access_token' name='access_token' />
+        <div>
+          <label for='server'>Server</label>
+        </div>
+        <div>
+          <input type='text' id='server' name='server' />
+        </div>
         <div>
           <label for='username'>Username</label>
         </div>

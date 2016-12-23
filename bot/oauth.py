@@ -13,7 +13,7 @@ def authenticate():
         def do_GET(self):
             self._respond()
 
-            with open('bot/auth/auth.html', 'r') as f:
+            with open('bot/html/auth.html', 'r') as f:
                 self.wfile.write(bytes(f.read(), 'utf8'))
 
             return
@@ -29,7 +29,7 @@ def authenticate():
                 d_obj[key_val[0]] = key_val[1]
 
             with open('login', 'w') as f:
-                f.write(d_obj['username'] + '\noauth:' + d_obj['access_token'])
+                f.write(d_obj['server'] + '\n' + d_obj['username'] + '\noauth:' + d_obj['access_token'])
 
             self.wfile.write(bytes("Authentication complete. You can now close the window.", 'utf-8'))
 
