@@ -28,13 +28,17 @@ def authenticate():
                 key_val = string.split('=')
                 d_obj[key_val[0]] = key_val[1]
 
+            d_obj['username'] = d_obj['username'].lower()
+            d_obj['server'] = d_obj['server'].lower()
+            if d_obj['server'][0] is not '#':
+                d_obj['server'] = '#' + d_obj['server']
+
             with open('login', 'w') as f:
                 f.write(d_obj['server'] + '\n' + d_obj['username'] + '\noauth:' + d_obj['access_token'])
 
             self.wfile.write(bytes("Authentication complete. You can now close the window.", 'utf-8'))
 
             return
-
 
     httpd = HTTPServer(('127.0.0.1', 8082), RequestHandler)
 
